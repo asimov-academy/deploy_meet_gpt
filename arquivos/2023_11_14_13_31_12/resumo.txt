@@ -1,0 +1,7 @@
+Resumo reunião: Discussão sobre novos projetos para a linha de modelos LLM, incluindo a expansão da linha, melhorias na eficiência do treinamento, expansão para novos setores e melhoria da interface do usuário.
+
+Acordos da reunião:
+- Explorar parcerias internacionais para aprimorar a tradução automática
+- Investir em técnicas de transferência de aprendizado para acelerar o treinamento de novos modelos
+- Formar equipes especializadas para adaptar os modelos às demandas de setores específicos
+- Investir em uma interface mais intuitiva e amigável com recursos de interação por voz e sugestões contextuais

@@ -1,0 +1,11 @@
+Resumo reunião:
+Discussão sobre desenvolvimento de cursos de programação em Python, incluindo cursos introdutórios e avançados, especializações, plataforma de ensino virtual, workshops presenciais em parceria com universidades e descontos para empresas.
+
+Acordos da Reunião:
+- Criar curso introdutório de Python para iniciantes
+- Incluir tópicos como sintaxe, estruturas de controle, funções, listas e dicionários
+- Oferecer cursos avançados com especializações e instrutores qualificados
+- Investir em plataforma de ensino virtual interativa
+- Explorar parcerias com universidades para workshops presenciais
+- Avaliar a viabilidade de oferecer descontos para empresas
+- Reavaliar o progresso na próxima semana.
