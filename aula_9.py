@@ -67,9 +67,10 @@ def listar_reunioes():
 
 
 # OPENAI UTILS =====================
-client = openai.OpenAI()
+
 
 def transcreve_audio(caminho_audio, language='pt', response_format='text'):
+    client = openai.OpenAI()
     with open(caminho_audio, 'rb') as arquivo_audio:
         transcricao = client.audio.transcriptions.create(
             model='whisper-1',
@@ -83,6 +84,7 @@ def chat_openai(
         mensagem,
         modelo='gpt-3.5-turbo-1106',
     ):
+    client = openai.OpenAI()
     mensagens = [{'role': 'user', 'content': mensagem}]
     resposta = client.chat.completions.create(
         model=modelo,
@@ -104,48 +106,60 @@ def adiciona_chunck_audio(frames_de_audio, audio_chunck):
     return audio_chunck
 
 def tab_grava_reuniao():
-    webrtx_ctx = webrtc_streamer(
-        key='recebe_audio',
-        mode=WebRtcMode.SENDONLY,
-        audio_receiver_size=1024,
-        media_stream_constraints={'video': False, 'audio': True},
-    )
+    
+    #gambiarra feita para possibilitar o deploy da aplicação
+    if st.button('Start', type='primary'):
+        st.warning('O Web app está desabilitado por ausência de chave da OpenAI')
+    
+    #código original comentado abaixo. Removemos ele para o deploy ocorrer sem erros, pois esta parte do código realiza conexao com a API da OpenAI 
+    #a partir de uma chave, mas como no deploy a chave não é inserida, por questão de segurança, precisamos retirar essa parte do código e incluir a gambiarra
+    #acima para representar o botão original da aplicação, mas com aviso informando ao ser clicado que a aplicação está sem a chave da API.
 
-    if not webrtx_ctx.state.playing:
-        return
+    # webrtx_ctx = webrtc_streamer(
+    #     key='recebe_audio',
+    #     mode=WebRtcMode.SENDONLY,
+    #     audio_receiver_size=1024,
+    #     media_stream_constraints={'video': False, 'audio': True},
+    # )
 
-    container = st.empty()
-    container.markdown('Comece a falar')
-    pasta_reuniao = PASTA_ARQUIVOS / datetime.now().strftime('%Y_%m_%d_%H_%M_%S')
-    pasta_reuniao.mkdir()
+    # if not webrtx_ctx.state.playing:
+    #     return
 
-    ultima_trancricao = time.time()
-    audio_completo = pydub.AudioSegment.empty()
-    audio_chunck = pydub.AudioSegment.empty()
-    transcricao = ''
+    # container = st.empty()
+    # container.markdown('Comece a falar')
+    # pasta_reuniao = PASTA_ARQUIVOS / datetime.now().strftime('%Y_%m_%d_%H_%M_%S')
+    # pasta_reuniao.mkdir()
 
-    while True:
-        if webrtx_ctx.audio_receiver:
-            try:
-                frames_de_audio = webrtx_ctx.audio_receiver.get_frames(timeout=1)
-            except queue.Empty:
-                time.sleep(0.1)
-                continue
-            audio_completo = adiciona_chunck_audio(frames_de_audio, audio_completo)
-            audio_chunck = adiciona_chunck_audio(frames_de_audio, audio_chunck)
-            if len(audio_chunck) > 0:
-                audio_completo.export(pasta_reuniao / 'audio.mp3')
-                agora = time.time()
-                if agora - ultima_trancricao > 5:
-                    ultima_trancricao = agora
-                    audio_chunck.export(pasta_reuniao / 'audio_temp.mp3')
-                    transcricao_chunck = transcreve_audio(pasta_reuniao / 'audio_temp.mp3')
-                    transcricao += transcricao_chunck
-                    salva_arquivo(pasta_reuniao / 'transcricao.txt', transcricao)
-                    container.markdown(transcricao)
-                    audio_chunck = pydub.AudioSegment.empty()
-        else:
-            break
+    # ultima_trancricao = time.time()
+    # audio_completo = pydub.AudioSegment.empty()
+    # audio_chunck = pydub.AudioSegment.empty()
+    # transcricao = ''
+
+    # while True:
+    #     if webrtx_ctx.audio_receiver:
+    #         try:
+    #             frames_de_audio = webrtx_ctx.audio_receiver.get_frames(timeout=1)
+    #         except queue.Empty:
+    #             time.sleep(0.1)
+    #             continue
+    #         audio_completo = adiciona_chunck_audio(frames_de_audio, audio_completo)
+    #         audio_chunck = adiciona_chunck_audio(frames_de_audio, audio_chunck)
+    #         if len(audio_chunck) > 0:
+    #             audio_completo.export(pasta_reuniao / 'audio.mp3')
+    #             agora = time.time()
+    #             if agora - ultima_trancricao > 5:
+    #                 ultima_trancricao = agora
+    #                 audio_chunck.export(pasta_reuniao / 'audio_temp.mp3')
+    #                 try:
+    #                     transcricao_chunck = transcreve_audio(pasta_reuniao / 'audio_temp.mp3')
+    #                 except:
+    #                     print("Erro")
+    #                 transcricao += transcricao_chunck
+    #                 salva_arquivo(pasta_reuniao / 'transcricao.txt', transcricao)
+    #                 container.markdown(transcricao)
+    #                 audio_chunck = pydub.AudioSegment.empty()
+    #     else:
+    #         break
 
 
 # TAB SELEÇÃO REUNIÃO =====================
@@ -179,7 +193,11 @@ def salvar_titulo(pasta_reuniao, titulo):
 
 def gerar_resumo(pasta_reuniao):
     transcricao = le_arquivo(pasta_reuniao / 'transcricao.txt')
-    resumo = chat_openai(mensagem=PROMPT.format(transcricao))
+    try:
+        resumo = chat_openai(mensagem=PROMPT.format(transcricao))
+    except:
+        print("Erro")
+    
     salva_arquivo(pasta_reuniao / 'resumo.txt', resumo)
 
 
